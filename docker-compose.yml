@@ -1,0 +1,44 @@
+version: "3.7"
+
+services:
+  nginx:
+    build: 
+    ## because files and folders are in nginx.docker file will be unreachble in ./dockerfiles folder
+      context: .
+      dockerfile: ./dockerfiles/nginx.dockerfile
+    container_name: nginx
+    ports:
+      - 8000:80
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx:/etc/nginx/conf.d
+  php:
+    build: 
+      context: .
+      dockerfile: ./dockerfiles/php.dockerfile
+    container_name: php
+    volumes:
+      - ./src:/var/www/html
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    volumes:
+      - ./mysql/db:/var/lib/mysql
+    ports:
+      - 33060:3306
+    env_file:
+      - ./env/mysql.env
+
+  composer:
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
+  artisan:
+    build: 
+      context: .
+      dockerfile: ./dockerfiles/php.dockerfile
+    volumes:
+      - ./src:/var/www/html
+    entrypoint: ["php","artisan"]
